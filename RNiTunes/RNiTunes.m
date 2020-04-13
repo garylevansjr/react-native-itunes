@@ -28,8 +28,20 @@ RCT_EXPORT_METHOD(getArtists:(NSDictionary *)params successCallback:(RCTResponse
     NSMutableArray *mutableArtistsToSerialize = [NSMutableArray array];
 
     for (MPMediaItemCollection *mediaItemCollection in artistsArray) {
+        NSDictionary *artistDictionary = [NSMutableDictionary dictionary];
         MPMediaItem *mediaItem = [mediaItemCollection representativeItem];
         NSString       *artist = [mediaItem valueForProperty:MPMediaItemPropertyArtist];
+        NSString *base64 = @"";
+        // http://stackoverflow.com/questions/25998621/mpmediaitemartwork-is-null-while-cover-is-available-in-itunes
+        MPMediaItemArtwork *artwork = [mediaItem valueForProperty: MPMediaItemPropertyArtwork];
+        if (artwork != nil) {
+            //NSLog(@"artwork %@", artwork);
+            UIImage *image = [artwork imageWithSize:CGSizeMake(100, 100)];
+            // http://www.12qw.ch/2014/12/tooltip-decoding-base64-images-with-chrome-data-url/
+            // http://stackoverflow.com/a/510444/185771
+            base64 = [NSString stringWithFormat:@"%@%@", @"data:image/jpeg;base64,", [self imageToNSString:image]];
+        }
+        artistDictionary = @{@"artist":artist, @"artwork": base64};
         [mutableArtistsToSerialize addObject:artist];
     }
     successCallback(@[mutableArtistsToSerialize]);
