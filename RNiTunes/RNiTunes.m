@@ -31,6 +31,22 @@ RCT_EXPORT_METHOD(getArtists:(NSDictionary *)params successCallback:(RCTResponse
         NSDictionary *artistDictionary = [NSMutableDictionary dictionary];
         MPMediaItem *mediaItem = [mediaItemCollection representativeItem];
         NSString       *artist = [mediaItem valueForProperty:MPMediaItemPropertyArtist];
+        artistDictionary = @{@"artist":artist, @"artwork": @""};
+        [mutableArtistsToSerialize addObject:artistDictionary];
+    }
+    successCallback(@[mutableArtistsToSerialize]);
+}
+
+RCT_EXPORT_METHOD(getArtistsWithArtwork:(NSDictionary *)params successCallback:(RCTResponseSenderBlock)successCallback) {
+
+    MPMediaQuery *artistsQuery = [MPMediaQuery artistsQuery];
+    NSArray      *artistsArray = [artistsQuery collections];
+    NSMutableArray *mutableArtistsToSerialize = [NSMutableArray array];
+
+    for (MPMediaItemCollection *mediaItemCollection in artistsArray) {
+        NSDictionary *artistDictionary = [NSMutableDictionary dictionary];
+        MPMediaItem *mediaItem = [mediaItemCollection representativeItem];
+        NSString       *artist = [mediaItem valueForProperty:MPMediaItemPropertyArtist];
         NSString *base64 = @"";
         // http://stackoverflow.com/questions/25998621/mpmediaitemartwork-is-null-while-cover-is-available-in-itunes
         MPMediaItemArtwork *artwork = [mediaItem valueForProperty: MPMediaItemPropertyArtwork];
@@ -42,7 +58,7 @@ RCT_EXPORT_METHOD(getArtists:(NSDictionary *)params successCallback:(RCTResponse
             base64 = [NSString stringWithFormat:@"%@%@", @"data:image/jpeg;base64,", [self imageToNSString:image]];
         }
         artistDictionary = @{@"artist":artist, @"artwork": base64};
-        [mutableArtistsToSerialize addObject:artist];
+        [mutableArtistsToSerialize addObject:artistDictionary];
     }
     successCallback(@[mutableArtistsToSerialize]);
 }
